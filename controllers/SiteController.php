@@ -124,13 +124,19 @@ class SiteController extends Controller
      */
     public function actionAbout()
     {
+
+        set_time_limit(200);
         $dataset1 = Dataset1::find()->all();
 
         $marks = [
           'Отлично' => 5,
           'Хорошо' => 4,
-          'Удовлетварительно' => 3,
-          'Неудовлетварительно' => 2,
+          'Удовлетворительно' => 3,
+          'Неудовлетворительно' => 2,
+          'Неявка' => 10,
+          'Зачтено' => 11,
+          'Не зачтено' => 12,
+          'Продление сессии' => 20,
         ];
 
         if (!$dataset1) {
@@ -172,16 +178,94 @@ class SiteController extends Controller
             }
 
             foreach ($the_big_array as $row) {
+                if (!$row[1]) {
+                    continue;
+                }
                 $record = new Dataset1();
                 $record->predmet = $hashTable[$row[0]];
                 $record->mark = $marks[$row[1]];
-
+                $record->year = $row[2];
+                $record->semestr = $row[3];
+                $record->vedomost_type = $row[4];
+                $record->ind_main = $row[5];
+                $record->disc_po_v = $row[6];
+                $record->save();
             }
 
-        } else {
-
         }
-        die;
-        return $this->render('about', ['data' => $the_big_array, 'hashTable' => $hashTable]);
+
+        $bar_2014 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT AVG(mark) FROM dataset_1
+        WHERE mark IN (2,3,4,5)
+        AND year = 2014
+SQL
+    )->queryScalar();
+
+        $bar_2015 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT AVG(mark) FROM dataset_1
+        WHERE mark IN (2,3,4,5)
+        AND year = 2015
+SQL
+    )->queryScalar();
+
+        $bar_2016 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT AVG(mark) FROM dataset_1
+        WHERE mark IN (2,3,4,5)
+        AND year = 2016
+SQL
+    )->queryScalar();
+
+        $bar_2017 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT AVG(mark) FROM dataset_1
+        WHERE mark IN (2,3,4,5)
+        AND year = 2017
+SQL
+    )->queryScalar();
+
+        $bar_2018 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT AVG(mark) FROM dataset_1
+        WHERE mark IN (2,3,4,5)
+        AND year = 2018
+SQL
+    )->queryScalar();
+
+        $pie_2 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT COUNT(mark) FROM dataset_1
+        WHERE mark = 2
+SQL
+    )->queryScalar();
+
+        $pie_3 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT COUNT(mark) FROM dataset_1
+        WHERE mark = 3
+SQL
+    )->queryScalar();
+
+        $pie_4 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT COUNT(mark) FROM dataset_1
+        WHERE mark = 4
+SQL
+    )->queryScalar();
+
+        $pie_5 = \Yii::$app->db->createCommand(<<<SQL
+        SELECT COUNT(mark) FROM dataset_1
+        WHERE mark = 5
+SQL
+    )->queryScalar();
+
+        $label = ' по всем предметам';
+
+        return $this->render('about', [
+            'bar_2014' => $bar_2014,
+            'bar_2015' => $bar_2015,
+            'bar_2016' => $bar_2016,
+            'bar_2017' => $bar_2017,
+            'bar_2018' => $bar_2018,
+            'pie_2' => $pie_2,
+            'pie_3' => $pie_3,
+            'pie_4' => $pie_4,
+            'pie_5' => $pie_5,
+            'label' => $label,
+        ]);
     }
 }
