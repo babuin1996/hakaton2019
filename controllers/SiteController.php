@@ -9,6 +9,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\Dataset1;
 
 class SiteController extends Controller
 {
@@ -123,6 +124,64 @@ class SiteController extends Controller
      */
     public function actionAbout()
     {
-        return $this->render('about');
+        $dataset1 = Dataset1::find()->all();
+
+        $marks = [
+          'Отлично' => 5,
+          'Хорошо' => 4,
+          'Удовлетварительно' => 3,
+          'Неудовлетварительно' => 2,
+        ];
+
+        if (!$dataset1) {
+
+            $filename = '../hakaton/hash_table.csv';
+
+// The nested array to hold all the arrays
+            $hashTable = [];
+
+// Open the file for reading
+            if (($h = fopen("{$filename}", "r")) !== FALSE) {
+                // Each line in the file is converted into an individual array that we call $data
+                // The items of the array are comma separated
+                while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
+                    // Each individual array is being pushed into the nested array
+                    $hashTable[$data[0]] = $data[1];
+                }
+
+                // Close the file
+                fclose($h);
+            }
+
+            $filename = '../hakaton/first.csv';
+
+// The nested array to hold all the arrays
+            $the_big_array = [];
+
+// Open the file for reading
+            if (($h = fopen("{$filename}", "r")) !== FALSE) {
+                // Each line in the file is converted into an individual array that we call $data
+                // The items of the array are comma separated
+                while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
+                    // Each individual array is being pushed into the nested array
+                    $the_big_array[] = $data;
+                }
+
+                // Close the file
+                fclose($h);
+            }
+
+            foreach ($the_big_array as $row) {
+                $record = new Dataset1();
+                $record->predmet = $hashTable[$row[0]];
+                $record->mark = $marks[$row[1]];
+
+            }
+
+        } else {
+
+        }
+        die;
+        return $this->render('about', ['data' => $the_big_array, 'hashTable' => $hashTable]);
     }
 }
