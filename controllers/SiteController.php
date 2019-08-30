@@ -253,6 +253,21 @@ SQL
 SQL
     )->queryScalar();
 
+        $vedomostPreData = \Yii::$app->db->createCommand(<<<SQL
+SELECT DISTINCT vedomost_type as type, count(id) as count
+FROM dataset_1
+GROUP BY vedomost_type
+SQL
+    )->queryAll();
+
+        $vedomostData = [];
+        $vedomostLabels = [];
+
+        foreach ($vedomostPreData as $row) {
+            array_push($vedomostData, $row['count']);
+            array_push($vedomostLabels, $row['type']);
+        }
+
         $label = ' по всем предметам';
 
         return $this->render('about', [
@@ -266,6 +281,9 @@ SQL
             'pie_4' => $pie_4,
             'pie_5' => $pie_5,
             'label' => $label,
+            'vedomostPreData' => $vedomostPreData,
+            'vedomostData' => json_encode($vedomostData),
+            'vedomostLabels' => json_encode($vedomostLabels, JSON_UNESCAPED_UNICODE),
         ]);
     }
 }

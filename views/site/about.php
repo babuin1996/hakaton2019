@@ -7,11 +7,14 @@ use yii\helpers\Html;
 $this->title = 'Данные';
 $this->params['breadcrumbs'][] = $this->title;
 $c = 0;
+$arr = [round((($bar_2015 * 100) / ($bar_2014)) - 100, 2), round((($bar_2016 * 100) / ($bar_2015)) - 100, 2), round((($bar_2017 * 100) / ($bar_2016)) - 100, 2), round((($bar_2018 * 100) / ($bar_2017)) - 100, 2)];
+$prognoz = array_sum($arr) / count($arr);
+$bar_2019 = $bar_2018 + ($bar_2018 / 100 * $prognoz)
 ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js" integrity="sha256-qSIshlknROr4J8GMHRlW3fGKrPki733tLq+qeMCR05Q=" crossorigin="anonymous"></script>
 <div class="site-about">
-    <h1><?= Html::encode($this->title) ?></h1>
-
+    <h1>Средние оценки</h1>
+    <br>
     <canvas id="myChart" width="800" height="600"></canvas>
 </div>
     <br>
@@ -51,8 +54,15 @@ $c = 0;
             <td><?= round($bar_2018, 2) ?></td>
             <td style="color: green;">↑ <?= round((($bar_2018 * 100) / ($bar_2017)) - 100, 2) ?>%</td>
         </tr>
+        <tr>
+            <td>2019 (прогноз)</td>
+            <td><?= round($bar_2019, 2) ?></td>
+            <td style="color: grey;">↑ <?= $prognoz ?>%</td>
+        </tr>
         </tbody>
     </table>
+    <h1>Распрделение оценок</h1>
+    <br>
 <div class="row">
     <canvas id="myChart2" width="800" height="600"></canvas>
 </div>
@@ -88,6 +98,30 @@ $c = 0;
         </tr>
         </tbody>
     </table>
+    <h1>Распределение ведомостей</h1>
+    <br>
+<div class="row">
+    <canvas id="myChart3" width="800" height="600"></canvas>
+</div>
+<br>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">Тип ведомости</th>
+            <th scope="col">Кол-во ведомостей</th>
+            <th scope="col">Процент от общего числа</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($vedomostPreData as $row ) {?>
+        <tr>
+            <td><?= $row['type'] ?></td>
+            <td><?= $row['count'] ?></td>
+            <td style="color: green;"><?= round($row['count'] / (array_sum(json_decode($vedomostData)) / 100),2) ?>%</td>
+        </tr>
+        <?php } ?>
+        </tbody>
+    </table>
 <?php
 $this->registerCssFile('@web/css/Chart.css.min');
 $this->registerJsFile('@web/js/Chart.js.min');
@@ -96,10 +130,10 @@ var ctx = document.getElementById(\"myChart\");
 var myChart = new Chart(ctx, {
   type: 'bar',
   data: {
-    labels: [\"2014\", \"2015\", \"2016\", \"2017\", \"2018\"],
+    labels: [\"2014\", \"2015\", \"2016\", \"2017\", \"2018\", \"2019 (прогноз)\"],
     datasets: [{
       label: 'Средня оценка'+'$label',
-      data: [$bar_2014, $bar_2015, $bar_2016, $bar_2017, $bar_2018],
+      data: [$bar_2014, $bar_2015, $bar_2016, $bar_2017, $bar_2018, $bar_2019],
       backgroundColor: [
         'rgba(255, 99, 132, 0.2)',
         'rgba(54, 162, 235, 0.2)',
@@ -181,6 +215,52 @@ var myChart = new Chart(ctx, {
         'rgba(153, 102, 255, 1)',
         'rgba(255, 159, 64, 1)',
         'rgba(255,99,132,1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: false,
+  }
+});
+");
+
+$this->registerJs("
+var ctx = document.getElementById(\"myChart3\");
+var myChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: $vedomostLabels,
+    datasets: [{
+      label: 'Распределение ведомостей',
+      data: $vedomostData,
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+        'rgba(255, 99, 34, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
+      ],
+      borderColor: [
+        'rgba(255,99,132,1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(255,99,45,1)',
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
